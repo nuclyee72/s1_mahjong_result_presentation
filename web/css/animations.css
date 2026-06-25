@@ -1,0 +1,248 @@
+/* ============================================================
+   animations.css - 키프레임 애니메이션 & 마이크로 인터랙션
+   ============================================================ */
+
+/* ============================================================
+   슬라이드 진입 애니메이션 (클래스 기반)
+   ============================================================ */
+
+/* 페이드업 */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 페이드인 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 스케일업 */
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* 슬라이드 라이트 */
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 카운트업 완료 glow */
+@keyframes numGlow {
+  0%   { text-shadow: none; }
+  50%  { text-shadow: 0 0 20px var(--gold-mid), 0 0 40px var(--gold); }
+  100% { text-shadow: none; }
+}
+
+/* 힌트 펄스 */
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+  50%       { opacity: 0.8; transform: translateX(-50%) translateY(-4px); }
+}
+
+/* 포디움 성장 */
+@keyframes podiumGrow {
+  from { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+  to   { transform: scaleY(1); transform-origin: bottom; opacity: 1; }
+}
+
+/* 왕관 bounce */
+@keyframes crownBounce {
+  0%   { transform: translateY(-8px) scale(0.5); opacity: 0; }
+  60%  { transform: translateY(4px) scale(1.1); opacity: 1; }
+  80%  { transform: translateY(-2px) scale(0.95); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+/* 배지 파티클 */
+@keyframes particleFly {
+  0%   { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+
+/* 스파클 */
+@keyframes sparkle {
+  0%,100% { opacity: 0; transform: scale(0); }
+  50%      { opacity: 1; transform: scale(1); }
+}
+
+/* 진행 바 shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* 플로팅 */
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-10px); }
+}
+
+/* 회전 */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* 바 채우기 */
+@keyframes barFill {
+  from { width: 0; }
+  to   { width: var(--target-w, 100%); }
+}
+
+/* 순위 카드 슬라이드인 (stagger) */
+.slide.active .rank-list-item {
+  animation: fadeUp 0.4s var(--ease-smooth) both;
+}
+
+.slide.active .rank-list-item:nth-child(1)  { animation-delay: 0.05s; }
+.slide.active .rank-list-item:nth-child(2)  { animation-delay: 0.10s; }
+.slide.active .rank-list-item:nth-child(3)  { animation-delay: 0.15s; }
+.slide.active .rank-list-item:nth-child(4)  { animation-delay: 0.20s; }
+.slide.active .rank-list-item:nth-child(5)  { animation-delay: 0.25s; }
+.slide.active .rank-list-item:nth-child(6)  { animation-delay: 0.30s; }
+.slide.active .rank-list-item:nth-child(7)  { animation-delay: 0.35s; }
+.slide.active .rank-list-item:nth-child(8)  { animation-delay: 0.40s; }
+.slide.active .rank-list-item:nth-child(9)  { animation-delay: 0.45s; }
+.slide.active .rank-list-item:nth-child(10) { animation-delay: 0.50s; }
+.slide.active .rank-list-item:nth-child(n+11) { animation-delay: 0.55s; }
+
+/* 개요 highlight 카드 stagger */
+.slide.active .highlight-card {
+  animation: scaleUp 0.4s var(--ease-bounce) both;
+}
+.slide.active .highlight-card:nth-child(1) { animation-delay: 0.1s; }
+.slide.active .highlight-card:nth-child(2) { animation-delay: 0.2s; }
+.slide.active .highlight-card:nth-child(3) { animation-delay: 0.3s; }
+.slide.active .highlight-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* 비교 컬럼 */
+.slide.active .compare-col {
+  animation: fadeUp 0.5s var(--ease-smooth) both;
+}
+.slide.active .compare-col:nth-child(1) { animation-delay: 0.1s; }
+.slide.active .compare-col:nth-child(3) { animation-delay: 0.2s; }
+
+/* 패턴 카드 */
+.slide.active .pattern-card {
+  animation: scaleUp 0.45s var(--ease-smooth) both;
+}
+.slide.active .pattern-card:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .pattern-card:nth-child(2) { animation-delay: 0.15s; }
+.slide.active .pattern-card:nth-child(3) { animation-delay: 0.25s; }
+.slide.active .pattern-card:nth-child(4) { animation-delay: 0.35s; }
+
+/* 기록 카드 */
+.slide.active .record-card {
+  animation: fadeUp 0.4s var(--ease-smooth) both;
+}
+.slide.active .record-card:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .record-card:nth-child(2) { animation-delay: 0.12s; }
+.slide.slide.active .record-card:nth-child(3) { animation-delay: 0.19s; }
+.slide.active .record-card:nth-child(4) { animation-delay: 0.26s; }
+.slide.active .record-card:nth-child(5) { animation-delay: 0.33s; }
+.slide.active .record-card:nth-child(6) { animation-delay: 0.40s; }
+
+/* 타이틀 슬라이드 진입 */
+.slide.active .title-season-badge { animation: fadeIn 0.6s 0.1s both; }
+.slide.active .title-main         { animation: fadeUp 0.7s 0.2s both; }
+.slide.active .title-sub          { animation: fadeUp 0.6s 0.35s both; }
+.slide.active .title-stats        { animation: fadeUp 0.6s 0.45s both; }
+.slide.active .title-players      { animation: fadeUp 0.6s 0.55s both; }
+.slide.active .title-hint         { animation: fadeIn 0.6s 0.8s both; }
+
+/* 포디움 블록 grow */
+.slide.active .podium-block {
+  animation: podiumGrow 0.6s var(--ease-bounce) both;
+}
+.slide.active .podium-slot.second .podium-block { animation-delay: 0.1s; }
+.slide.active .podium-slot.first  .podium-block { animation-delay: 0.2s; }
+.slide.active .podium-slot.third  .podium-block { animation-delay: 0.3s; }
+
+/* 포디움 카드 */
+.slide.active .podium-card {
+  animation: fadeUp 0.5s var(--ease-smooth) both;
+}
+.slide.active .podium-slot.second .podium-card { animation-delay: 0.3s; }
+.slide.active .podium-slot.first  .podium-card { animation-delay: 0.4s; }
+.slide.active .podium-slot.third  .podium-card { animation-delay: 0.5s; }
+
+/* 왕관 */
+.slide.active .podium-crown { animation: crownBounce 0.7s 0.7s both; }
+
+/* 4위 카드 */
+.slide.active .fourth-card { animation: fadeUp 0.5s 0.6s both; }
+
+/* ============================================================
+   개인 모달 애니메이션
+   ============================================================ */
+.modal-stat-row {
+  animation: slideRight 0.35s var(--ease-smooth) both;
+}
+
+.modal-bar-fill {
+  animation: barFill 0.8s var(--ease-smooth) both;
+  animation-delay: var(--bar-delay, 0s);
+}
+
+/* ============================================================
+   숫자 카운트업 완료 효과
+   ============================================================ */
+.count-done {
+  animation: numGlow 0.8s ease-out;
+}
+
+/* ============================================================
+   파티클 타일 (타이틀 배경)
+   ============================================================ */
+.bg-tile {
+  position: absolute;
+  border: 1px solid rgba(201,160,0,0.15);
+  border-radius: 4px;
+  animation: float var(--duration, 6s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ============================================================
+   shimmer 배경 (포디움 1위)
+   ============================================================ */
+.podium-slot.first .podium-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(201,160,0,0.12) 50%,
+    transparent 60%
+  );
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ============================================================
+   반응형
+   ============================================================ */
+@media (max-width: 1024px) {
+  .rankings-layout { grid-template-columns: 1fr; }
+  .network-layout { grid-template-columns: 1fr; }
+  .records-grid { grid-template-columns: repeat(2, 1fr); }
+  .awards-grid { grid-template-columns: repeat(2, 1fr); }
+  .overview-compare { grid-template-columns: 1fr; }
+  .compare-divider { flex-direction: row; padding: 0.25rem 0; }
+  .compare-divider-line { width: auto; height: 1px; flex: 1; }
+}
+
+@media (max-width: 768px) {
+  .slide-content { padding: 60px 24px 80px; }
+  .title-main { font-size: 3.5rem; }
+  .records-grid { grid-template-columns: 1fr; }
+  .awards-grid { grid-template-columns: 1fr; }
+  .overview-highlights { grid-template-columns: repeat(2, 1fr); }
+}

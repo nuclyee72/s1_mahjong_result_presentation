@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>26-1 시즌 1 결산</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+<div id="presentation">
+  
+  <!-- 전체 슬라이드에서 유지되는 라벨 -->
+  <div id="total-label" style="opacity: 0; pointer-events: none; transition: opacity 0.5s ease; z-index: 10;">
+    총 대국 수: <span id="total-count">0</span>
+  </div>
+  <div id="slides-wrapper">
+
+    <!-- ===================== SLIDE 1: 타이틀 ===================== -->
+    <section class="slide" id="slide-1">
+      <div class="slide-inner center">
+        <h1 id="title-text">26-1 시즌 1 결산</h1>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 2: 누적 대국 수 ===================== -->
+    <section class="slide" id="slide-2">
+      <div class="slide-inner">
+
+        <!-- 중앙 차트 영역 -->
+        <div id="chart-area">
+          <canvas id="main-canvas"></canvas>
+        </div>
+
+        <!-- 하단: 플레이 버튼 + 슬라이더 -->
+        <div id="controls-row">
+          <button id="play-btn" aria-label="재생">
+            <!-- 삼각형 아이콘 -->
+            <svg id="play-icon" viewBox="0 0 24 24" width="22" height="22">
+              <polygon points="5,3 19,12 5,21" fill="currentColor"/>
+            </svg>
+            <svg id="pause-icon" viewBox="0 0 24 24" width="22" height="22" style="display:none">
+              <rect x="5" y="3" width="4" height="18" fill="currentColor"/>
+              <rect x="15" y="3" width="4" height="18" fill="currentColor"/>
+            </svg>
+          </button>
+          <div id="slider-wrap">
+            <input type="range" id="date-slider" min="0" max="100" value="0" step="0.01">
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 3: 프리시즌 비교 ===================== -->
+    <section class="slide" id="slide-3">
+      <div class="slide-inner">
+        <svg id="slide3-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible;">
+           <line id="s3-line-top" stroke="#888" stroke-width="2" stroke-dasharray="6 6" x1="0" y1="0" x2="0" y2="0" opacity="0" style="transition: opacity 0.5s"/>
+           <line id="s3-line-bottom" stroke="#888" stroke-width="2" stroke-dasharray="6 6" x1="0" y1="0" x2="0" y2="0" opacity="0" style="transition: opacity 0.5s"/>
+        </svg>
+        <div id="compare-area">
+          <div id="base-line"></div>
+          <div class="compare-col">
+            <div class="compare-title">25 프리시즌</div>
+            <div class="bar-wrap">
+              <div class="bar-value" id="pre-bar-val">0</div>
+              <div class="bar pre-bar" id="pre-bar"></div>
+            </div>
+          </div>
+          <div class="compare-col">
+            <div class="compare-title">26-1 시즌 1</div>
+            <div class="bar-wrap">
+              <div class="bar-value" id="s1-bar-val">0</div>
+              <div class="bar s1-bar" id="s1-bar" style="position: relative;">
+                <div id="s1-return-bar" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; background: #555; transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; align-items: center; justify-content: center;">
+                  <span id="s1-return-label" style="color: white; font-weight: 700; font-size: 1.3rem; opacity: 0; transition: opacity 0.5s ease; text-align: center; line-height: 1.3;"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 4: 플레이어 분포 ===================== -->
+    <section class="slide" id="slide-4">
+      <div class="slide-inner">
+        <h2 id="slide4-title">플레이어 분포</h2>
+        <div id="network-container"></div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 5: 요일별 데이터 ===================== -->
+    <section class="slide" id="slide-5">
+      <div class="slide-inner">
+        <h2 id="slide5-title">요일별 데이터<br><span id="slide5-subtitle">대국 수</span></h2>
+        <div id="weekday-area">
+          <div id="base-line-5"></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-0">0%</div><div class="weekday-bar" id="wd-bar-0"></div></div><div class="weekday-name">월</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-1">0%</div><div class="weekday-bar" id="wd-bar-1"></div></div><div class="weekday-name">화</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-2">0%</div><div class="weekday-bar" id="wd-bar-2"></div></div><div class="weekday-name">수</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-3">0%</div><div class="weekday-bar" id="wd-bar-3"></div></div><div class="weekday-name">목</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-4">0%</div><div class="weekday-bar" id="wd-bar-4"></div></div><div class="weekday-name">금</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-5">0%</div><div class="weekday-bar" id="wd-bar-5"></div></div><div class="weekday-name">토</div></div>
+          <div class="weekday-col"><div class="weekday-bar-wrap"><div class="weekday-val" id="wd-val-6">0%</div><div class="weekday-bar" id="wd-bar-6"></div></div><div class="weekday-name">일</div></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ===================== SLIDE 5b: 시간별 데이터 ===================== -->
+    <section class="slide" id="slide-5b">
+      <div class="slide-inner">
+        <h2 id="slide5b-title">시간별 데이터<br><span id="slide5b-subtitle">대국 수</span></h2>
+        <div id="hour-area"></div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 6: 대국 수와 포인트 ===================== -->
+    <section class="slide" id="slide-7">
+      <div id="slide7-left">
+        <h1 id="slide7-title">대국<br>수와<br>포인트</h1>
+        <div id="slide7-stats">
+          corr: <span id="s7-corr">?</span><br>
+          p-value: <span id="s7-pval">?</span><br>
+          <span style="font-size: 1.1rem; color: #e63946;">y = <span id="s7-slope">?</span>x <span id="s7-intercept">?</span></span>
+        </div>
+      </div>
+      <div id="slide7-right">
+        <div id="scatter-container"></div>
+      </div>
+    </section>
+    <!-- ===================== SLIDE 8: 히트맵 ===================== -->
+    <section class="slide" id="slide-8">
+      <div id="slide8-inner">
+        <div id="slide8-header">
+          <h1 id="slide8-title">주요 이벤트</h1>
+          <div id="heatmap-legend-row"></div>
+        </div>
+        <div id="heatmap-container"></div>
+        <div id="exam-event-cards"></div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 9: 시상 ===================== -->
+    <section class="slide" id="slide-9">
+      <h1 id="slide9-title">시상</h1>
+      <div id="slide9-content">
+        <!-- 1. 총 pt -->
+        <div class="award-card" id="award-1">
+          <div class="award-title">26 시즌 1 총 pt</div>
+          <div class="award-tier"><span class="tier-name tier-plat">TOP 1:</span> 조경서 (3042.8 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 김성빈 (1549.4 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 이은호 (1230.5 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 김형진 (1205.0 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 김진수 (646.1 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 남윤석 (478.8 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 박형준 (352.4 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 류수빈 (277.5 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 김연우 (255.3 pt)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 10:</span> 최지원 (121.2 pt)</div>
+        </div>
+
+        <!-- 2. 총 판수 -->
+        <div class="award-card" id="award-2">
+          <div class="award-title">26 시즌 1 총 판수</div>
+          <div class="award-tier"><span class="tier-name tier-plat">TOP 1:</span> 조경서 (200판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 김성빈 (112판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 김형진 (112판)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 5:</span> 박철우 (88판)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 5:</span> 강준혁 (83판)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 5:</span> 신건 (83판)</div>
+        </div>
+
+        <!-- 3. 연대율 & 라스회피 -->
+        <div class="award-card" id="award-3">
+          <div class="award-title">연대율 & 라스회피</div>
+          <div style="font-weight:800;margin-top:10px;margin-bottom:8px;color:#333;font-size:1.1rem;">연대율</div>
+          <div class="award-tier"><span class="tier-name tier-plat">TOP 1:</span> 김연우 (90.0% / 10판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 조성재 (71.4% / 7판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 박형준 (68.8% / 16판)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 5:</span> 송형진 (66.7% / 9판)</div>
+          <div class="award-tier"><span class="tier-name tier-silv">TOP 5:</span> 이은호 (66.1% / 62판)</div>
+          <div style="font-weight:800;margin-top:24px;margin-bottom:8px;color:#333;font-size:1.1rem;">라스회피</div>
+          <div class="award-tier"><span class="tier-name tier-plat">TOP 1:</span> 조성재 (100.0% / 7판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 김진수 (96.7% / 30판)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 박형준 (93.8% / 16판)</div>
+        </div>
+
+        <!-- 4. 특별상 한꺼번에 -->
+        <div class="award-card" id="award-4">
+          <div class="award-title">26 시즌 1 특별상</div>
+          
+          <div style="font-weight:800;margin-top:10px;margin-bottom:8px;color:#333;font-size:1.1rem;">최고점수</div>
+          <div class="award-tier"><span class="tier-name tier-plat">TOP 1:</span> 신건 (83,800점)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 김성빈 (83,200점)</div>
+          <div class="award-tier"><span class="tier-name tier-gold">TOP 3:</span> 원종선 (78,200점)</div>
+
+          <div style="font-weight:800;margin-top:24px;margin-bottom:8px;color:#333;font-size:1.1rem;">총 pt -1등</div>
+          <div class="award-tier"><span class="tier-name tier-bron">TOP -1:</span> 강준혁 (-1073.9 pt)</div>
+
+          <div style="font-weight:800;margin-top:24px;margin-bottom:8px;color:#333;font-size:1.1rem;">토비율 TOP 1</div>
+          <div class="award-tier"><span class="tier-name tier-bron">TOP 1:</span> 이규빈 (33.3%)</div>
+        </div>
+
+        <!-- 5. 역만의 증표 -->
+        <div class="award-card" id="award-5">
+          <div class="award-title">26-1 시즌 1 역만의 증표</div>
+          <div class="award-tier" style="margin-top: 20px; font-weight: bold; color: #888;">(추후 내용이 여기에 표시됩니다)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SLIDE 10: 개인별 통계 ===================== -->
+    <section class="slide" id="slide-10">
+      <div style="padding: 40px;">
+        <h1 style="font-size: 3rem; font-weight: 900; color: #111; letter-spacing: -1px; margin-bottom: 20px;">개인별 통계</h1>
+        <p style="color: #666; font-size: 1.2rem;">(추후 내용이 표시됩니다)</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+#presentation {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+#slides-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* ── 슬라이드 기본 ── */
+.slide {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  /* 기본: 오른쪽에 대기 */
+  transform: translateX(100%);
+  transition: transform 0.5s ease;
+  will-change: transform;
+}
+
+.slide.active {
+  transform: translateX(0);
+}
+
+/* 나가는 슬라이드(왼쪽으로) */
+.slide.slide-out-left {
+  transform: translateX(-100%);
+}
+
+.slide-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  padding: 48px;
+}
+
+.slide-inner.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── SLIDE 1: 타이틀 ── */
+#title-text {
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  color: #111;
+  letter-spacing: -0.02em;
+}
+
+/* ── SLIDE 2 ── */
+#total-label {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: #111;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+#total-label span {
+  font-weight: 700;
+  font-size: clamp(2rem, 6vw, 4rem);
+}
+
+/* 차트 영역 */
+#chart-area {
+  position: absolute;
+  top: 110px;
+  left: 48px;
+  right: 48px;
+  bottom: 90px;
+}
+
+#main-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 하단 컨트롤 */
+#controls-row {
+  position: absolute;
+  bottom: 28px;
+  left: 48px;
+  right: 48px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#play-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #111;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#play-btn:hover { opacity: 1; }
+
+#slider-wrap {
+  flex: 1;
+  position: relative;
+}
+
+#date-slider {
+  width: 100%;
+  height: 3px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #ddd;
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+#date-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #111;
+  cursor: pointer;
+}
+
+#date-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #111;
+  border: none;
+  cursor: pointer;
+}
+
+#slider-date-label {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  font-size: 0.75rem;
+  color: #666;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── SLIDE 3 ── */
+#compare-area {
+  position: absolute;
+  top: 150px;
+  bottom: 100px;
+  left: 100px;
+  right: 100px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 120px;
+}
+#base-line {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 4px;
+  background: #111;
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 0;
+}
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 240px;
+  height: 100%;
+  justify-content: flex-end;
+  z-index: 1;
+}
+.compare-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 20px;
+}
+.bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  width: 100%;
+}
+.bar-value {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #111;
+}
+.bar {
+  width: 120px;
+  background: #111;
+  height: 0%;
+  transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pre-bar {
+  background: #bbb;
+}
+.s1-bar {
+  background: #111;
+}
+
+/* ── SLIDE 4 ── */
+#slide4-title {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: #111;
+  font-weight: 700;
+  z-index: 10;
+  margin: 0;
+  pointer-events: none;
+}
+#network-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background-color: transparent;
+}
+.node-circle {
+  fill: #fff;
+  stroke: #111;
+  stroke-width: 2px;
+  cursor: pointer;
+  transition: fill 0.2s;
+}
+
+.node-label {
+  font-family: sans-serif;
+  font-size: 14px;
+  fill: #333;
+  pointer-events: none;
+  font-weight: 500;
+  transition: opacity 0.3s;
+}
+.link-line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+  transition: stroke-opacity 0.3s, stroke-width 0.3s;
+}
+
+/* ── SLIDE 5 ── */
+#slide5-title {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: #111;
+  font-weight: 700;
+  z-index: 10;
+  margin: 0;
+}
+#weekday-area {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 50%;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+#base-line-5 {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 4px;
+  background-color: #111;
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 1;
+}
+.weekday-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 8%;
+  height: 100%;
+  z-index: 2;
+  position: relative;
+}
+.weekday-bar-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+.weekday-bar {
+  width: 100%;
+  height: 0%;
+  background-color: #111;
+  transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.weekday-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 8px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.weekday-name {
+  position: absolute;
+  top: 100%;
+  margin-top: 10px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111;
+  text-align: center;
+  width: 100%;
+}
+.wd-count {
+  font-size: 1rem;
+  color: #555;
+  font-weight: 500;
+  margin-top: 4px;
+}
+#slide5-subtitle {
+  transition: opacity 0.3s ease;
+}
+#slide5b-subtitle {
+  transition: opacity 0.3s ease;
+}
+
+#slide-7 {
+  display: flex;
+  flex-direction: row;
+  padding: 40px;
+}
+#slide7-left {
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+#slide7-title {
+  font-size: 5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #111;
+  margin: 0;
+  letter-spacing: -2px;
+}
+#slide7-stats {
+  font-size: 1.5rem;
+  color: #555;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+#slide7-right {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+#scatter-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.scatter-dot {
+  fill: #111;
+  opacity: 0.6;
+  transition: r 0.2s, opacity 0.2s;
+}
+.scatter-dot:hover {
+  fill: #e63946;
+  opacity: 1;
+}
+.scatter-tooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  z-index: 10;
+}
+.axis path,
+.axis line {
+  stroke: #aaa;
+}
+.axis text {
+  fill: #555;
+  font-size: 0.9rem;
+}
+
+/* ── SLIDE 8 (히트맵) ── */
+/* ── SLIDE 8: 히트맵 ── */
+#slide-8 {
+  padding: 36px 40px 28px;
+  display: flex;
+  align-items: stretch;
+}
+#slide8-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#slide8-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  flex-shrink: 0;
+}
+#slide8-title {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #111;
+  margin: 0;
+  letter-spacing: -2px;
+  white-space: nowrap;
+}
+#heatmap-legend-row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.heatmap-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.heatmap-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.heatmap-legend-label {
+  font-size: 11px;
+  color: #555;
+}
+#heatmap-container {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+#exam-event-cards {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  flex-shrink: 0;
+}
+.exam-card {
+  flex: 1;
+  background: #f8f8f8;
+  border-left: 3px solid #111;
+  border-radius: 4px;
+  padding: 10px 14px;
+}
+.exam-card-name {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111;
+  margin-bottom: 2px;
+}
+.exam-card-period {
+  font-size: 0.78rem;
+  color: #888;
+  margin-bottom: 5px;
+}
+.exam-card-stats {
+  font-size: 0.88rem;
+  color: #333;
+  line-height: 1.6;
+}
+.exam-card-highlight {
+  font-weight: 700;
+  color: #111;
+}
+.heatmap-rect {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.heatmap-rect:hover {
+  opacity: 0.7;
+}
+.heatmap-label {
+  font-size: 10px;
+  fill: #777;
+}
+
+/* ── SLIDE 9 (시상) ── */
+#slide-9 {
+  padding: 40px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+#slide9-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10rem;
+  font-weight: 900;
+  color: #111;
+  margin: 0;
+  letter-spacing: -2px;
+  transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  white-space: nowrap;
+}
+#slide9-title.moved {
+  top: 40px;
+  left: 40px;
+  transform: translate(0, 0);
+  font-size: 5rem;
+}
+#slide9-content {
+  margin-top: 100px;
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+.award-card {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translate(-50%, 20px);
+  width: 70%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 40px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: all 0.5s ease;
+  visibility: hidden;
+}
+.award-card.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  visibility: visible;
+}
+.award-title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 24px;
+  border-bottom: 3px solid #eee;
+  padding-bottom: 16px;
+  color: #111;
+}
+.award-tier {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+  color: #333;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.tier-name {
+  font-weight: 900;
+  display: inline-block;
+  margin-right: 4px;
+}
+.tier-plat { color: #5aa1e3; }
+.tier-gold { color: #d4af37; }
+.tier-silv { color: #999999; }
+.tier-bron { color: #cd7f32; }
+
+/* ── SLIDE 5b: 시간별 데이터 ── */
+#slide-5b .slide-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 48px 60px 80px;
+  box-sizing: border-box;
+}
+#slide5b-title {
+  position: absolute;
+  top: 48px;
+  left: 48px;
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: #111;
+  font-weight: 700;
+  z-index: 10;
+  margin: 0;
+}
+#hour-area {
+  position: absolute;
+  bottom: 60px;
+  left: 60px;
+  right: 60px;
+  top: 180px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.hour-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  position: relative;
+}
+.hour-bar-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.hour-bar {
+  width: 100%;
+  height: 0%;
+  background-color: #111;
+  transition: height 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hour-val {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 4px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  text-align: center;
+}
+#base-line-5b {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background-color: #111;
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hour-label {
+  position: absolute;
+  top: calc(100% + 10px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #111;
+  text-align: center;
+  white-space: nowrap;
+  width: 100%;
+}
+
+</style>
+
+
+
+
+<script>
+// ── 데이터 로드 ──
+let DATA = null;
+
+async function loadData() {
+  const res = await fetch('data/stats.json');
+  DATA = await res.json();
+}
+
+// ── 슬라이드 전환 ──
+let currentSlide = 7; // 임시로 8번 슬라이드(인덱스 7)부터 시작
+let isAnimating = false;
+const slides = document.querySelectorAll('.slide');
+const TOTAL = slides.length; // Will be 7 after dynamic injection or manual added
+
+function goTo(index) {
+  if (isAnimating || index === currentSlide || index < 0 || index >= TOTAL) return;
+  isAnimating = true;
+
+  if (index === 2) {
+    if (typeof resetSlide3 === 'function') resetSlide3();
+  }
+  if (index === 4 && typeof resetSlide5 === 'function') resetSlide5();
+
+  const cur = slides[currentSlide];
+  const nxt = slides[index];
+  const goForward = index > currentSlide;
+
+  let inTransform = '';
+  let outTransform = '';
+  let resetTransform = '';
+  
+  if ((currentSlide === 1 && index === 2) || (currentSlide === 3 && index === 4) || (currentSlide === 6 && index === 7) || (currentSlide === 8 && index === 9)) {
+    // 수직: 아래에서 올라옴
+    inTransform = 'translateY(100%)';
+    outTransform = 'translateY(-100%)';
+    resetTransform = 'translateY(0)';
+  } else if ((currentSlide === 2 && index === 1) || (currentSlide === 4 && index === 3) || (currentSlide === 7 && index === 6) || (currentSlide === 9 && index === 8)) {
+    // 수직: 위에서 내려옴
+    inTransform = 'translateY(-100%)';
+    outTransform = 'translateY(100%)';
+    resetTransform = 'translateY(0)';
+  } else if (goForward) {
+    inTransform = 'translateX(100%)';
+    outTransform = 'translateX(-100%)';
+    resetTransform = 'translateX(0)';
+  } else {
+    inTransform = 'translateX(-100%)';
+    outTransform = 'translateX(100%)';
+    resetTransform = 'translateX(0)';
+  }
+
+  nxt.style.transform = inTransform;
+  nxt.style.transition = 'none';
+  nxt.classList.add('active');
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    nxt.style.transition = 'transform 0.5s ease';
+    nxt.style.transform = resetTransform;
+    cur.style.transition = 'transform 0.5s ease';
+    cur.style.transform = outTransform;
+
+    const tl = document.getElementById('total-label');
+    if (index === 1 || index === 2) {
+      tl.style.opacity = '1';
+    } else {
+      tl.style.opacity = '0';
+    }
+
+    setTimeout(() => {
+      cur.classList.remove('active');
+      cur.style.transform = '';
+      cur.style.transition = '';
+      nxt.style.transition = '';
+      currentSlide = index;
+      isAnimating = false;
+      onSlideEnter(index);
+    }, 520);
+  }));
+}
+
+// 키보드 탐색
+let slide3Step = 0;
+let slide9Step = 0;
+
+document.addEventListener('contextmenu', e => { e.preventDefault(); document.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'})); });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    if (currentSlide === 1) {
+      const slider = document.getElementById('date-slider');
+      const maxVal = parseFloat(slider.max);
+      if (sliderIndex < maxVal) {
+        startPlay(byDateEntries[byDateEntries.length - 1].cumulative, true);
+        return;
+      }
+    }
+
+    if (currentSlide === 2 && slide3Step === 0) {
+      slide3Step = 1;
+      playSlide3Step1();
+      return;
+    }
+    
+    if (currentSlide === 8 && slide9Step < 5) {
+      if (slide9Step === 0) {
+        document.getElementById('slide9-title').classList.add('moved');
+      } else {
+        document.getElementById(`award-${slide9Step}`).classList.remove('show');
+      }
+      slide9Step++;
+      document.getElementById(`award-${slide9Step}`).classList.add('show');
+      return;
+    }
+    
+    if (currentSlide === 4 && slide5Step === 0) {
+      slide5Step = 1;
+      playSlide5Step2();
+      return;
+    }
+
+    if (currentSlide === 5 && slide5bStep === 0) {
+      slide5bStep = 1;
+      playSlide5bStep2();
+      return;
+    }
+
+    goTo(currentSlide + 1);
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    if (currentSlide === 2 && slide3Step === 1) {
+      slide3Step = 0;
+      reverseSlide3Step1();
+      return;
+    }
+    if (currentSlide === 4 && slide5Step === 1) {
+      slide5Step = 0;
+      reverseSlide5Step2();
+      return;
+    }
+    if (currentSlide === 5 && slide5bStep === 1) {
+      slide5bStep = 0;
+      reverseSlide5bStep2();
+      return;
+    }
+    if (currentSlide === 8 && slide9Step > 0) {
+      document.getElementById(`award-${slide9Step}`).classList.remove('show');
+      slide9Step--;
+      if (slide9Step === 0) {
+        document.getElementById('slide9-title').classList.remove('moved');
+      } else {
+        document.getElementById(`award-${slide9Step}`).classList.add('show');
+      }
+      return;
+    }
+    goTo(currentSlide - 1);
+  }
+});
+
+// ── Slide 2: 누적 대국 수 그래프 ──
+let slide2Inited = false;
+let playInterval = null;
+let isPlaying = false;
+let sliderIndex = 0;
+let byDateEntries = []; // [{date, cumulative}]
+
+function initSlide2() {
+  if (slide2Inited) return;
+  slide2Inited = true;
+
+  // 날짜별 데이터 정리 (누적 합계)
+  const byDate = DATA.season1.overall.by_date;
+  const sortedDates = Object.keys(byDate).sort();
+  let cum = 0;
+  byDateEntries = sortedDates.map(date => {
+    cum += byDate[date];
+    return { date, count: byDate[date], cumulative: cum };
+  });
+
+  const total = cum;
+  const slider = document.getElementById('date-slider');
+  slider.max = byDateEntries.length - 1;
+  slider.value = 0;
+
+  // 슬라이더 이동 시 그래프 갱신
+  slider.addEventListener('input', () => {
+    if (isPlaying) stopPlay();
+    sliderIndex = parseFloat(slider.value);
+    drawChart(sliderIndex);
+    updateTotalCount(sliderIndex, total);
+    updateDateLabel(sliderIndex);
+  });
+
+  // 플레이 버튼
+  document.getElementById('play-btn').addEventListener('click', () => {
+    if (isPlaying) stopPlay();
+    else startPlay(total);
+  });
+
+  // 초기 그리기
+  drawChart(0);
+  updateTotalCount(0, total);
+  updateDateLabel(0);
+}
+
+function updateTotalCount(idx, total) {
+  const n = Math.floor(idx);
+  const frac = idx - n;
+  let cur = byDateEntries[n]?.cumulative || 0;
+  if (n < byDateEntries.length - 1 && frac > 0) {
+    const next = byDateEntries[n+1].cumulative;
+    cur = cur + (next - cur) * frac;
+  }
+  document.getElementById('total-count').textContent = Math.round(cur);
+}
+
+function updateDateLabel(idx) {
+  // 사용하지 않음 (날짜 글씨 숨김)
+}
+
+let playStartTime = 0;
+let playStartIdx = 0;
+
+function startPlay(total, fast = false) {
+  if (isPlaying) stopPlay();
+  isPlaying = true;
+  document.getElementById('play-icon').style.display = 'none';
+  document.getElementById('pause-icon').style.display = '';
+
+  // 슬라이더를 처음부터 시작
+  if (sliderIndex >= byDateEntries.length - 1) {
+    sliderIndex = 0;
+    document.getElementById('date-slider').value = 0;
+    drawChart(0);
+    updateTotalCount(0, total);
+    updateDateLabel(0);
+  }
+
+  playStartIdx = sliderIndex;
+  playStartTime = performance.now();
+  const DURATION_MS = fast ? 500 : 4000; // fast 모드면 0.5초만에 완료
+  const maxIdx = byDateEntries.length - 1;
+
+  function step(time) {
+    if (!isPlaying) return;
+    const elapsed = time - playStartTime;
+    const speed = maxIdx / DURATION_MS;
+    sliderIndex = playStartIdx + elapsed * speed;
+    
+    if (sliderIndex >= maxIdx) {
+      sliderIndex = maxIdx;
+      document.getElementById('date-slider').value = sliderIndex;
+      drawChart(sliderIndex);
+      updateTotalCount(sliderIndex, total);
+      updateDateLabel(sliderIndex);
+      stopPlay();
+      return;
+    }
+    
+    document.getElementById('date-slider').value = sliderIndex;
+    drawChart(sliderIndex);
+    updateTotalCount(sliderIndex, total);
+    updateDateLabel(sliderIndex);
+    playInterval = requestAnimationFrame(step);
+  }
+  playInterval = requestAnimationFrame(step);
+}
+
+function stopPlay() {
+  isPlaying = false;
+  cancelAnimationFrame(playInterval);
+  playInterval = null;
+  document.getElementById('play-icon').style.display = '';
+  document.getElementById('pause-icon').style.display = 'none';
+}
+
+function drawChart(upToIndex) {
+  const canvas = document.getElementById('main-canvas');
+  const area = document.getElementById('chart-area');
+  canvas.width = area.clientWidth;
+  canvas.height = area.clientHeight;
+
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const total = byDateEntries.length;
+  const maxVal = byDateEntries[total - 1].cumulative;
+
+  const padL = 60, padR = 20, padT = 20, padB = 40;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 가로 눈금선(Y축) 완전히 제거함
+
+  // X축 날짜 레이블 (일부만 표시)
+  ctx.fillStyle = '#999';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const labelStep = Math.ceil(total / 8);
+  for (let i = 0; i < total; i += labelStep) {
+    const x = padL + (i / (total - 1)) * chartW;
+    const date = byDateEntries[i].date;
+    const shortDate = date.slice(5); // MM-DD
+    ctx.fillText(shortDate, x, padT + chartH + 8);
+  }
+  // 마지막 날짜
+  {
+    const x = padL + chartW;
+    ctx.fillText(byDateEntries[total - 1].date.slice(5), x, padT + chartH + 8);
+  }
+
+  if (upToIndex < 0) return;
+
+  // 꺾은선 그래프 그리기 (부드럽게)
+  const n = Math.floor(upToIndex);
+  const frac = upToIndex - n;
+
+  ctx.beginPath();
+  let lastX = 0, lastY = 0;
+  for (let i = 0; i <= Math.min(n, total - 1); i++) {
+    const x = padL + (i / (total - 1)) * chartW;
+    const y = padT + chartH - (byDateEntries[i].cumulative / maxVal) * chartH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    lastX = x;
+    lastY = y;
+  }
+
+  if (n < total - 1 && frac > 0) {
+    const x1 = padL + (n / (total - 1)) * chartW;
+    const y1 = padT + chartH - (byDateEntries[n].cumulative / maxVal) * chartH;
+    const x2 = padL + ((n + 1) / (total - 1)) * chartW;
+    const y2 = padT + chartH - (byDateEntries[n + 1].cumulative / maxVal) * chartH;
+    lastX = x1 + (x2 - x1) * frac;
+    lastY = y1 + (y2 - y1) * frac;
+    ctx.lineTo(lastX, lastY);
+  }
+
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // 끝점 점
+  if (n >= 0) {
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#111';
+    ctx.fill();
+  }
+}
+
+
+
+let slide5bStep = 0;
+let slide5bCols = [];
+let slide5bOrderedKeys = [];
+
+function resetSlide5b() {
+  slide5bStep = 0;
+  const hourArea = document.getElementById('hour-area');
+  if (hourArea) hourArea.innerHTML = '';
+  slide5bCols = [];
+  slide5bOrderedKeys = [];
+  const subtitle = document.getElementById('slide5b-subtitle');
+  if (subtitle) subtitle.textContent = '대국 수';
+}
+
+let slide5Step = 0;
+function resetSlide5() {
+  slide5Inited = false;
+  slide5Step = 0;
+  document.getElementById('base-line-5').style.width = '0%';
+  document.getElementById('slide5-subtitle').textContent = '대국 수';
+  for (let i = 0; i < 7; i++) {
+    document.getElementById(`wd-bar-${i}`).style.height = '0%';
+    const valEl = document.getElementById(`wd-val-${i}`);
+    valEl.innerHTML = '';
+    valEl.style.opacity = '0';
+  }
+}
+
+function resetSlide3() {
+  slide3Inited = false;
+  slide3Step = 0;
+  document.getElementById('base-line').style.width = '0%';
+  document.getElementById('pre-bar').style.height = '0%';
+  document.getElementById('s1-bar').style.height = '0%';
+  document.getElementById('pre-bar-val').textContent = '0';
+  document.getElementById('s1-bar-val').textContent = '0';
+  
+  document.getElementById('s1-return-bar').style.height = '0%';
+  document.getElementById('s1-return-label').style.opacity = '0';
+  document.getElementById('s3-line-top').style.opacity = '0';
+  document.getElementById('s3-line-bottom').style.opacity = '0';
+}
+
+
+let slide3Inited = false;
+function initSlide3() {
+  if (slide3Inited) return;
+  slide3Inited = true;
+
+  const preGames = DATA.preseason.overall.total_games;
+  const s1Games = DATA.season1.overall.total_games;
+
+  // 1. 가로선이 먼저 늘어남
+  document.getElementById('base-line').style.width = '70%';
+
+  // 2. 가로선 완료 후 막대그래프 솟아남
+  setTimeout(() => {
+    const maxGames = Math.max(preGames, s1Games);
+    const preRatio = preGames / maxGames;
+    const s1Ratio = s1Games / maxGames;
+    
+    document.getElementById('pre-bar').style.height = `${preRatio * 60}%`;
+    document.getElementById('s1-bar').style.height = `${s1Ratio * 60}%`;
+
+    countUp(document.getElementById('pre-bar-val'), preGames, 1000);
+    countUp(document.getElementById('s1-bar-val'), s1Games, 1000);
+  }, 600); // 선 애니메이션 시간(0.6초) 대기
+}
+
+function countUp(el, target, duration = 1000) {
+  const start = performance.now();
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.round(target * ease);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+
+function playSlide3Step1() {
+  // 전 시즌 참가자 (뱃지 2004 보유)
+  const allBadges = DATA.badges.all_player_badges;
+  const prevPlayers = Object.keys(allBadges).filter(p => allBadges[p].some(b => b.code === 2004));
+  
+  // 시즌 1 참가 인원 중 이전 참가자들의 판수 합계
+  let returningGames = 0;
+  for (const p of prevPlayers) {
+    if (DATA.season1.players[p]) {
+      returningGames += DATA.season1.players[p].games;
+    }
+  }
+  
+  const returningSeats = returningGames; // S1 대국수는 그대로 (1게임당 각자 1석씩)
+  const totalSeats = DATA.season1.overall.total_games * 4;
+  const percentage = (returningSeats / totalSeats * 100).toFixed(1);
+
+  // s1-return-bar 애니메이션
+  const returnBar = document.getElementById('s1-return-bar');
+  const returnLabel = document.getElementById('s1-return-label');
+  
+  // s1-bar의 전체 대비 returningSeats의 비율
+  // s1-bar의 실제 픽셀 높이는 percentage * s1-bar height.
+  // CSS height %는 부모(s1-bar) 대비이므로 그냥 percentage를 쓴다.
+  const ratio = (returningSeats / totalSeats) * 100;
+  returnBar.style.height = `${ratio}%`;
+  
+  returnLabel.innerHTML = `전 시즌 참가자<br>${percentage}%`;
+  
+  setTimeout(() => {
+    returnLabel.style.opacity = '1';
+    drawDottedLines();
+  }, 1000);
+}
+
+function reverseSlide3Step1() {
+  document.getElementById('s1-return-bar').style.height = '0%';
+  document.getElementById('s1-return-label').style.opacity = '0';
+  document.getElementById('s3-line-top').style.opacity = '0';
+  document.getElementById('s3-line-bottom').style.opacity = '0';
+}
+
+function drawDottedLines() {
+  const svg = document.getElementById('slide3-svg');
+  const preBar = document.getElementById('pre-bar');
+  const returnBar = document.getElementById('s1-return-bar');
+  
+  const svgRect = svg.getBoundingClientRect();
+  const preRect = preBar.getBoundingClientRect();
+  const retRect = returnBar.getBoundingClientRect();
+  
+  const lineTop = document.getElementById('s3-line-top');
+  const lineBottom = document.getElementById('s3-line-bottom');
+  
+  // pre-bar 우측 상단 -> return-bar 좌측 상단
+  lineTop.setAttribute('x1', preRect.right - svgRect.left);
+  lineTop.setAttribute('y1', preRect.top - svgRect.top);
+  lineTop.setAttribute('x2', retRect.left - svgRect.left);
+  lineTop.setAttribute('y2', retRect.top - svgRect.top);
+  
+  // pre-bar 우측 하단 -> return-bar 좌측 하단
+  lineBottom.setAttribute('x1', preRect.right - svgRect.left);
+  lineBottom.setAttribute('y1', preRect.bottom - svgRect.top);
+  lineBottom.setAttribute('x2', retRect.left - svgRect.left);
+  lineBottom.setAttribute('y2', retRect.bottom - svgRect.top);
+  
+  lineTop.style.opacity = '1';
+  lineBottom.style.opacity = '1';
+}
+
+window.addEventListener('resize', () => {
+  if (slide3Step === 1 && currentSlide === 2) {
+    drawDottedLines();
+  }
+});
+
+
+let slide4Inited = false;
+function initSlide4() {
+  if (slide4Inited) return;
+  slide4Inited = true;
+
+  const container = document.getElementById('network-container');
+  const width = container.clientWidth || 958;
+  const height = container.clientHeight || 944;
+
+  const players = DATA.co_play_players; // array of names
+  const matrix = DATA.co_play_matrix;
+
+  // Build nodes and links
+  const allBadges = DATA.badges.all_player_badges;
+  const prevPlayers = new Set(Object.keys(allBadges).filter(p => allBadges[p].some(b => b.code === 2004)));
+
+  const nodes = players.map(name => {
+    return {
+      id: name,
+      games: DATA.season1.players[name].games,
+      isPrevPlayer: prevPlayers.has(name)
+    };
+  });
+
+  const links = [];
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      const p1 = players[i];
+      const p2 = players[j];
+      const val1 = matrix[p1] && matrix[p1][p2] ? matrix[p1][p2] : 0;
+      const val2 = matrix[p2] && matrix[p2][p1] ? matrix[p2][p1] : 0;
+      const weight = Math.max(val1, val2);
+      // 선 자체를 줄이기 위해 4번 이상 같이 친 경우만 선으로 연결
+      if (weight >= 4) {
+        links.push({
+          source: p1,
+          target: p2,
+          weight: weight
+        });
+      }
+    }
+  }
+
+  const svg = d3.select('#network-container').append('svg')
+    .attr('width', '100%')
+    .attr('height', '100%')
+    .call(d3.zoom().on('zoom', (event) => {
+      g.attr('transform', event.transform);
+    }));
+
+  const g = svg.append('g');
+
+  const maxGames = d3.max(nodes, d => d.games);
+  const maxWeight = d3.max(links, d => d.weight);
+
+  const radiusScale = d3.scaleSqrt().domain([0, maxGames]).range([5, 25]);
+  const linkWidthScale = d3.scaleLinear().domain([0, maxWeight]).range([0.5, 5]);
+
+  // 클러스터링 색상 지정을 위해 간단한 그룹화 연산 (가장 많이 플레이한 사람 기준)
+  nodes.forEach(n => {
+    let maxW = 0;
+    let bestP = n.id;
+    links.forEach(l => {
+      const s = typeof l.source === 'object' ? l.source.id : l.source;
+      const t = typeof l.target === 'object' ? l.target.id : l.target;
+      if (s === n.id && l.weight > maxW) { maxW = l.weight; bestP = t; }
+      if (t === n.id && l.weight > maxW) { maxW = l.weight; bestP = s; }
+    });
+    n.group = bestP; // 임시 그룹
+  });
+  const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+  const simulation = d3.forceSimulation(nodes)
+    // 같이 많이 플레이한 사람들끼리 더 강하게 뭉치도록 거리 설정
+    .force('link', d3.forceLink(links).id(d => d.id).distance(d => Math.max(30, 250 - d.weight * 3)))
+    // 전체적인 반발력을 키워서 서로 떨어지게 만듦
+    .force('charge', d3.forceManyBody().strength(-400))
+    // 판수가 많은 핵심 플레이어는 중앙으로 당기고, 적은 플레이어는 바깥으로 밀려나게 함
+    .force('x', d3.forceX(width / 2).strength(d => (d.games / maxGames) * 0.15))
+    .force('y', d3.forceY(height / 2).strength(d => (d.games / maxGames) * 0.15))
+    .force('collision', d3.forceCollide().radius(d => radiusScale(d.games) + 15));
+
+  const link = g.append('g')
+    .attr('class', 'links')
+    .selectAll('line')
+    .data(links)
+    .enter().append('line')
+    .attr('class', 'link-line')
+    .attr('stroke-width', d => linkWidthScale(d.weight));
+
+  const nodeGroup = g.append('g')
+    .attr('class', 'nodes')
+    .selectAll('g')
+    .data(nodes)
+    .enter().append('g')
+    .call(d3.drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended));
+
+  const circles = nodeGroup.append('circle')
+    .attr('class', 'node-circle')
+    .attr('r', d => radiusScale(d.games))
+    .style('fill', d => d.isPrevPlayer ? '#ddd' : '#fff');
+
+  const labels = nodeGroup.append('text')
+    .attr('class', 'node-label')
+    .text(d => d.id)
+    .attr('dx', 0)
+    .attr('dy', d => radiusScale(d.games) + 12)
+    .attr('text-anchor', 'middle');
+
+  simulation.on('tick', () => {
+    link
+      .attr('x1', d => d.source.x)
+      .attr('y1', d => d.source.y)
+      .attr('x2', d => d.target.x)
+      .attr('y2', d => d.target.y);
+
+    nodeGroup
+      .attr('transform', d => `translate(${d.x},${d.y})`);
+  });
+
+  // Hover interactions
+  nodeGroup.on('mouseover', function(event, d) {
+    // Find neighbors
+    const connectedNodeIds = new Set([d.id]);
+    link.each(function(l) {
+      if (l.source.id === d.id) connectedNodeIds.add(l.target.id);
+      if (l.target.id === d.id) connectedNodeIds.add(l.source.id);
+    });
+
+    // Dim non-neighbors
+    circles.transition().duration(200).style('opacity', o => connectedNodeIds.has(o.id) ? 1 : 0.1);
+    labels.transition().duration(200)
+      .style('opacity', o => connectedNodeIds.has(o.id) ? 1 : 0.1)
+      .style('font-size', o => o.id === d.id ? '20px' : (connectedNodeIds.has(o.id) ? '16px' : '14px'))
+      .style('font-weight', o => connectedNodeIds.has(o.id) ? 700 : 500);
+    
+    link.transition().duration(200)
+      .style('stroke-opacity', l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05)
+      .style('stroke', l => (l.source.id === d.id || l.target.id === d.id) ? '#111' : '#999');
+  });
+
+  nodeGroup.on('mouseout', function() {
+    circles.transition().duration(200).style('opacity', 1);
+    labels.transition().duration(200).style('opacity', 1).style('font-size', '14px').style('font-weight', 500);
+    link.transition().duration(200).style('stroke-opacity', 0.6).style('stroke', '#999');
+  });
+
+  // Drag functions
+  function dragstarted(event, d) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  }
+  function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+  }
+  function dragended(event, d) {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null;
+    d.fy = null;
+  }
+}
+
+
+let slide5Inited = false;
+function initSlide5() {
+  if (slide5Inited) return;
+  slide5Inited = true;
+
+  const wdData = DATA.season1.overall.by_weekday;
+  const wdKeys = ['월', '화', '수', '목', '금', '토', '일'];
+  const wdCounts = wdKeys.map(k => wdData[k] || 0);
+  const total = DATA.season1.overall.total_games;
+  const maxCount = Math.max(...wdCounts);
+
+  document.getElementById('base-line-5').style.width = '100%';
+
+  setTimeout(() => {
+    wdCounts.forEach((count, i) => {
+      const ratio = count / maxCount; // 0~1
+      const percentage = ((count / total) * 100).toFixed(1);
+      
+      const bar = document.getElementById(`wd-bar-${i}`);
+      const valEl = document.getElementById(`wd-val-${i}`);
+      
+      let rankText = '';
+      const sortedIndices = wdCounts.map((val, idx) => ({val, idx})).sort((a, b) => b.val - a.val);
+      if (i === sortedIndices[0].idx) rankText = '<div style="color:#d4af37; font-size:1.2rem; font-weight:900;">1st</div>';
+      else if (i === sortedIndices[1].idx) rankText = '<div style="color:#a0a0a0; font-size:1.1rem; font-weight:800;">2nd</div>';
+      else if (i === sortedIndices[2].idx) rankText = '<div style="color:#cd7f32; font-size:1.1rem; font-weight:800;">3rd</div>';
+
+      bar.style.height = `${ratio * 100}%`;
+      
+      // percentage animation
+      const start = performance.now();
+      const duration = 1000;
+      function step(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const currentVal = (percentage * p).toFixed(1);
+        const currentCount = Math.round(count * p);
+        valEl.innerHTML = `${rankText}<div>${currentVal}%</div><div class="wd-count">${currentCount}판</div>`;
+        if (p < 1) requestAnimationFrame(step);
+        else valEl.innerHTML = `${rankText}<div>${percentage}%</div><div class="wd-count">${count}판</div>`;
+      }
+      requestAnimationFrame(step);
+      
+      valEl.style.opacity = '1';
+    });
+  }, 600);
+}
+
+
+function playSlide5Step2() {
+  const subtitle = document.getElementById('slide5-subtitle');
+  subtitle.style.opacity = '0';
+  
+  setTimeout(() => {
+    subtitle.textContent = '토비율';
+    subtitle.style.opacity = '1';
+  }, 300);
+
+  const wdKeys = ['월', '화', '수', '목', '금', '토', '일'];
+  const tobiData = DATA.season1.overall.tobi_rate_by_weekday || {};
+  const tobiRates = wdKeys.map(k => tobiData[k] || 0);
+  const maxTobi = Math.max(...tobiRates);
+
+  const sortedIndices = tobiRates.map((val, idx) => ({val, idx})).sort((a, b) => b.val - a.val);
+
+  tobiRates.forEach((rate, i) => {
+    const bar = document.getElementById(`wd-bar-${i}`);
+    const valEl = document.getElementById(`wd-val-${i}`);
+    
+    const ratio = maxTobi > 0 ? rate / maxTobi : 0;
+    bar.style.height = `${ratio * 100}%`;
+    
+    let rankText = '';
+    if (i === sortedIndices[0].idx) rankText = '<div style="color:#d4af37; font-size:1.2rem; font-weight:900;">1st</div>';
+    else if (i === sortedIndices[1].idx) rankText = '<div style="color:#a0a0a0; font-size:1.1rem; font-weight:800;">2nd</div>';
+    else if (i === sortedIndices[2].idx) rankText = '<div style="color:#cd7f32; font-size:1.1rem; font-weight:800;">3rd</div>';
+
+    // Animation text
+    const oldText = valEl.innerHTML;
+    // We just set to final text for simplicity since percentage animation is complex to reverse and re-run.
+    valEl.innerHTML = `${rankText}<div>${rate.toFixed(1)}%</div>`;
+  });
+}
+
+function reverseSlide5Step2() {
+  const subtitle = document.getElementById('slide5-subtitle');
+  subtitle.style.opacity = '0';
+  
+  setTimeout(() => {
+    subtitle.textContent = '대국 수';
+    subtitle.style.opacity = '1';
+  }, 300);
+
+  const wdData = DATA.season1.overall.by_weekday;
+  const wdKeys = ['월', '화', '수', '목', '금', '토', '일'];
+  const wdCounts = wdKeys.map(k => wdData[k] || 0);
+  const total = DATA.season1.overall.total_games;
+  const maxCount = Math.max(...wdCounts);
+
+  const sortedIndices = wdCounts.map((val, idx) => ({val, idx})).sort((a, b) => b.val - a.val);
+
+  wdCounts.forEach((count, i) => {
+    const bar = document.getElementById(`wd-bar-${i}`);
+    const valEl = document.getElementById(`wd-val-${i}`);
+    
+    const ratio = maxCount > 0 ? count / maxCount : 0;
+    const percentage = ((count / total) * 100).toFixed(1);
+    
+    bar.style.height = `${ratio * 100}%`;
+    
+    let rankText = '';
+    if (i === sortedIndices[0].idx) rankText = '<div style="color:#d4af37; font-size:1.2rem; font-weight:900;">1st</div>';
+    else if (i === sortedIndices[1].idx) rankText = '<div style="color:#a0a0a0; font-size:1.1rem; font-weight:800;">2nd</div>';
+    else if (i === sortedIndices[2].idx) rankText = '<div style="color:#cd7f32; font-size:1.1rem; font-weight:800;">3rd</div>';
+
+    valEl.innerHTML = `${rankText}<div>${percentage}%</div><div class="wd-count">${count}판</div>`;
+  });
+}
+
+// ── 슬라이드 진입 핸들러 ──
+function onSlideEnter(index) {
+  if (index === 1) initSlide2();
+  if (index === 2) initSlide3();
+  if (index === 3) initSlide4();
+  if (index === 4) initSlide5();
+  if (index === 5) { resetSlide5b(); initSlide5b(); }
+  if (index === 6) initSlide6();
+  if (index === 7) initSlide7();
+  
+  if (index !== 8) {
+    slide9Step = 0;
+    const title = document.getElementById('slide9-title');
+    if (title) title.classList.remove('moved');
+    for (let i = 1; i <= 5; i++) {
+      const card = document.getElementById(`award-${i}`);
+      if (card) card.classList.remove('show');
+    }
+  }
+}
+
+
+
+let slide6Inited = false;
+
+
+function initSlide5b() {
+  const hourArea = document.getElementById('hour-area');
+  if (!hourArea || hourArea.querySelector('.hour-col')) return;
+
+  const byHour = DATA.season1.overall.by_hour;
+  const total = Object.values(byHour).reduce((a, b) => a + b, 0);
+
+  // Order: 12 13 14 ... 23 00 01 ... 11
+  slide5bOrderedKeys = [];
+  for (let h = 12; h < 24; h++) slide5bOrderedKeys.push(String(h).padStart(2, '0'));
+  for (let h = 0; h < 12; h++) slide5bOrderedKeys.push(String(h).padStart(2, '0'));
+
+  const counts = slide5bOrderedKeys.map(k => byHour[k] || 0);
+  const max = Math.max(...counts);
+
+  // Add baseline
+  const baseLine = document.createElement('div');
+  baseLine.id = 'base-line-5b';
+  hourArea.appendChild(baseLine);
+
+  slide5bCols = [];
+  slide5bOrderedKeys.forEach((key, i) => {
+    const count = counts[i];
+    const pct = max > 0 ? (count / max * 100) : 0;
+
+    const col = document.createElement('div');
+    col.className = 'hour-col';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'hour-bar-wrap';
+
+    const val = document.createElement('div');
+    val.className = 'hour-val';
+    val.textContent = count > 0 ? count + '국' : '';
+
+    const bar = document.createElement('div');
+    bar.className = 'hour-bar';
+    bar.dataset.target = pct;
+
+    wrap.appendChild(val);
+    wrap.appendChild(bar);
+    col.appendChild(wrap);
+
+    // Label: show every 3rd hour or on :00 midnight
+    const hourNum = parseInt(key);
+    const showLabel = (hourNum % 3 === 0);
+    if (showLabel) {
+      const label = document.createElement('div');
+      label.className = 'hour-label';
+      if (hourNum === 0) {
+        label.textContent = '자정';
+      } else if (hourNum === 12) {
+        label.textContent = '정오';
+      } else {
+        label.textContent = hourNum < 12 ? `오전${hourNum}시` : `오후${hourNum - 12}시`;
+      }
+      col.appendChild(label);
+    }
+
+    hourArea.appendChild(col);
+    slide5bCols.push({ bar, val, pct, count });
+  });
+
+  // Animate
+  requestAnimationFrame(() => {
+    baseLine.style.width = '100%';
+    setTimeout(() => {
+      slide5bCols.forEach(({ bar, val, pct, count }, i) => {
+        setTimeout(() => {
+          bar.style.height = pct + '%';
+          if (count > 0) val.style.opacity = '1';
+        }, i * 30);
+      });
+    }, 400);
+  });
+}
+
+function playSlide5bStep2() {
+  const subtitle = document.getElementById('slide5b-subtitle');
+  subtitle.style.opacity = '0';
+  setTimeout(() => {
+    subtitle.textContent = '토비율';
+    subtitle.style.opacity = '1';
+  }, 300);
+
+  const rawData = DATA.season1.overall.tobi_raw_by_hour || {};
+
+  // ordered keys를 3개씩 묶어서 그룹 토비율 계산
+  // slide5bOrderedKeys: [12,13,14, 15,16,17, ..., 00,01,02, ..., 09,10,11]
+  const groups = [];
+  for (let i = 0; i < slide5bOrderedKeys.length; i += 3) {
+    const chunk = slide5bOrderedKeys.slice(i, i + 3);
+    let totalTobi = 0, totalHands = 0;
+    chunk.forEach(k => {
+      totalTobi  += (rawData[k]?.tobi  || 0);
+      totalHands += (rawData[k]?.total || 0);
+    });
+    const rate = totalHands > 0 ? totalTobi / totalHands * 100 : 0;
+    groups.push({ chunk, rate, totalHands });
+  }
+
+  const maxRate   = Math.max(...groups.map(g => g.rate));
+  const sortedGrp = [...groups].sort((a, b) => b.rate - a.rate);
+
+  slide5bCols.forEach(({ bar, val }, i) => {
+    const groupIdx = Math.floor(i / 3);
+    const group    = groups[groupIdx];
+    const rate     = group.rate;
+    const ratio    = maxRate > 0 ? rate / maxRate : 0;
+
+    bar.style.height          = ratio * 100 + '%';
+    bar.style.backgroundColor = '#111';
+
+    // 라벨은 그룹 중앙 막대(i%3===1)에만 표시
+    if (i % 3 === 1 && group.totalHands > 0) {
+      const rank = sortedGrp.indexOf(group);
+      let rankText = '';
+      if (rank === 0) rankText = '<div style="color:#d4af37;font-size:1.2rem;font-weight:900;">1st</div>';
+      else if (rank === 1) rankText = '<div style="color:#a0a0a0;font-size:1.1rem;font-weight:800;">2nd</div>';
+      else if (rank === 2) rankText = '<div style="color:#cd7f32;font-size:1.1rem;font-weight:800;">3rd</div>';
+      val.innerHTML    = `${rankText}<div>${rate.toFixed(1)}%</div>`;
+      val.style.opacity = '1';
+    } else {
+      val.innerHTML    = '';
+      val.style.opacity = '0';
+    }
+  });
+}
+
+function reverseSlide5bStep2() {
+  const subtitle = document.getElementById('slide5b-subtitle');
+  subtitle.style.opacity = '0';
+  setTimeout(() => {
+    subtitle.textContent = '대국 수';
+    subtitle.style.opacity = '1';
+  }, 300);
+
+  const byHour   = DATA.season1.overall.by_hour;
+  const counts   = slide5bOrderedKeys.map(k => byHour[k] || 0);
+  const max      = Math.max(...counts);
+  const sortedIdx = counts.map((v, i) => ({v, i})).sort((a, b) => b.v - a.v);
+
+  slide5bCols.forEach(({ bar, val }, i) => {
+    const count = counts[i];
+    const ratio = max > 0 ? count / max : 0;
+    bar.style.height          = ratio * 100 + '%';
+    bar.style.backgroundColor = '';  // CSS default(#111)로 복귀
+
+    let rankText = '';
+    if (i === sortedIdx[0].i) rankText = '<div style="color:#d4af37;font-size:1.2rem;font-weight:900;">1st</div>';
+    else if (i === sortedIdx[1].i) rankText = '<div style="color:#a0a0a0;font-size:1.1rem;font-weight:800;">2nd</div>';
+    else if (i === sortedIdx[2].i) rankText = '<div style="color:#cd7f32;font-size:1.1rem;font-weight:800;">3rd</div>';
+
+    val.innerHTML    = count > 0 ? `${rankText}<div>${count}국</div>` : '';
+    val.style.opacity = count > 0 ? '1' : '0';
+  });
+}
+
+function initSlide6() {
+  if (slide6Inited) return;
+  slide6Inited = true;
+
+  // Set corr and pval
+  const corrData = DATA.season1.overall.correlation;
+  if (corrData) {
+    document.getElementById('s7-corr').textContent = corrData.corr.toFixed(3);
+    document.getElementById('s7-pval').textContent = corrData.p_value.toFixed(4);
+    document.getElementById('s7-slope').textContent = corrData.slope.toFixed(2);
+    document.getElementById('s7-intercept').textContent = (corrData.intercept >= 0 ? '+ ' : '- ') + Math.abs(corrData.intercept).toFixed(2);
+  }
+
+  // Draw scatter plot
+  const container = document.getElementById('scatter-container');
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+  const margin = {top: 40, right: 40, bottom: 60, left: 80};
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  container.innerHTML = '';
+  
+  d3.select('body').selectAll('.scatter-tooltip').remove();
+  const tooltip = d3.select('body').append('div')
+    .attr('class', 'scatter-tooltip');
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const players = DATA.season1.players;
+  const data = [];
+  for (const name in players) {
+    const p = players[name];
+    if (p.games && p.total_score !== undefined) {
+      data.push({
+        name: name,
+        games: p.games,
+        score: p.total_score
+      });
+    }
+  }
+
+  const xScale = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.games) * 1.1])
+    .range([0, innerWidth]);
+
+  const yScale = d3.scaleLinear()
+    .domain([d3.min(data, d => d.score) * 1.1, d3.max(data, d => d.score) * 1.1])
+    .range([innerHeight, 0]);
+
+  // Add axes
+  const xAxis = d3.axisBottom(xScale).ticks(5);
+  const yAxis = d3.axisLeft(yScale).ticks(5).tickFormat(d => d.toLocaleString());
+
+  svg.append('g')
+    .attr('class', 'axis')
+    .attr('transform', `translate(0,${innerHeight})`)
+    .call(xAxis)
+    .append('text')
+    .attr('x', innerWidth / 2)
+    .attr('y', 40)
+    .attr('fill', '#111')
+    .style('font-size', '1rem')
+    .style('font-weight', '700')
+    .text('대국 수');
+
+  svg.append('g')
+    .attr('class', 'axis')
+    .call(yAxis)
+    .append('text')
+    .attr('transform', 'rotate(-90)')
+    .attr('x', -innerHeight / 2)
+    .attr('y', -60)
+    .attr('fill', '#111')
+    .style('font-size', '1rem')
+    .style('font-weight', '700')
+    .text('포인트 (pt)');
+
+  // Zero line
+  svg.append('line')
+    .attr('x1', 0)
+    .attr('x2', innerWidth)
+    .attr('y1', yScale(0))
+    .attr('y2', yScale(0))
+    .attr('stroke', '#ccc')
+    .attr('stroke-dasharray', '4,4');
+
+
+  // Add Regression Line
+  if (corrData && corrData.slope !== undefined && corrData.intercept !== undefined) {
+    const xMin = d3.min(data, d => d.games);
+    const xMax = d3.max(data, d => d.games);
+    const y1 = corrData.slope * xMin + corrData.intercept;
+    const y2 = corrData.slope * xMax + corrData.intercept;
+
+    const line = svg.append('line')
+      .attr('class', 'regression-line')
+      .attr('x1', xScale(xMin))
+      .attr('y1', yScale(y1))
+      .attr('x2', xScale(xMin)) // start at xMin to animate
+      .attr('y2', yScale(y1))
+      .attr('stroke', '#e63946')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '5,5')
+      .style('opacity', 0.8);
+
+    line.transition()
+      .duration(1500)
+      .ease(d3.easeCubicOut)
+      .attr('x2', xScale(xMax))
+      .attr('y2', yScale(y2));
+  }
+
+  // 대국 수 기준으로 정렬 (왼쪽부터 순서대로 등장)
+  data.sort((a, b) => a.games - b.games);
+
+  // Add dots - 제자리에서 왼쪽부터 순서대로 나타남
+  const dots = svg.selectAll('circle')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('class', 'scatter-dot')
+    .attr('cx', d => xScale(d.games))
+    .attr('cy', d => yScale(d.score))
+    .attr('r', 5)
+    .style('opacity', 0)
+    .on('mouseover', function(e, d) {
+      d3.select(this).attr('r', 8);
+      tooltip.html(`<b>${d.name}</b><br>${d.games}판<br>${d.score.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} pt`)
+        .style('opacity', 1)
+        .style('left', (e.pageX + 15) + 'px')
+        .style('top', (e.pageY - 15) + 'px');
+    })
+    .on('mousemove', function(e) {
+      tooltip.style('left', (e.pageX + 15) + 'px')
+        .style('top', (e.pageY - 15) + 'px');
+    })
+    .on('mouseout', function() {
+      d3.select(this).attr('r', 5);
+      tooltip.style('opacity', 0);
+    });
+
+  dots.transition()
+    .duration(200)
+    .delay((d, i) => i * 30)
+    .ease(d3.easeLinear)
+    .style('opacity', 1);
+}
+
+// ── 진입점 ──
+async function main() {
+  // 현재 슬라이드 기준 초기화
+  for (let i = 0; i < slides.length; i++) {
+    if (i === currentSlide) {
+      slides[i].style.transform = 'translateX(0)';
+      slides[i].classList.add('active');
+    } else if (i < currentSlide) {
+      slides[i].style.transform = 'translateX(-100%)';
+      slides[i].classList.remove('active');
+    } else {
+      slides[i].style.transform = 'translateX(100%)';
+      slides[i].classList.remove('active');
+    }
+  }
+  
+  // slide-4(index 3) 또는 5페이지부터 시작 시 total-label 숨김 처리
+  const tl = document.getElementById('total-label');
+  if (currentSlide === 1 || currentSlide === 2) {
+    tl.style.opacity = '1';
+  } else {
+    tl.style.opacity = '0';
+  }
+  
+  try {
+    await loadData();
+    onSlideEnter(currentSlide);
+  } catch(e) {
+    console.error('데이터 로드 실패', e);
+  }
+}
+
+main();
+
+let heatmapInitialized = false;
+function initSlide7() {
+  if (heatmapInitialized) return;
+  heatmapInitialized = true;
+
+  // ── 범례 렌더 (HTML) ──
+  const legendData = [
+    { label: '0국',      color: '#ebedf0' },
+    { label: '1~3국',   color: '#9be9a8' },
+    { label: '4~6국',   color: '#40c463' },
+    { label: '7~9국',   color: '#30a14e' },
+    { label: '10국 이상', color: '#216e39' },
+  ];
+  const legendEl = document.getElementById('heatmap-legend-row');
+  if (legendEl) {
+    legendEl.innerHTML = legendData.map(l => `
+      <div class="heatmap-legend-item">
+        <span class="heatmap-legend-swatch" style="background:${l.color}"></span>
+        <span class="heatmap-legend-label">${l.label}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── 데이터 준비 ──
+  const container = document.getElementById('heatmap-container');
+  const W = container.clientWidth  || 900;
+  const H = container.clientHeight || 180;
+
+  const byDate    = DATA.season1.overall.by_date;
+  const parseDate = d3.timeParse('%Y-%m-%d');
+  const fmtDate   = d3.timeFormat('%Y-%m-%d');
+
+  const entries = Object.keys(byDate).map(d => ({ date: parseDate(d), count: byDate[d], ds: d }));
+  entries.sort((a, b) => a.date - b.date);
+
+  const startDate = d3.timeWeek.floor(entries[0].date);
+  const endDate   = d3.timeWeek.ceil(entries[entries.length - 1].date);
+  const numWeeks  = d3.timeWeeks(startDate, endDate).length;
+
+  // 패딩: 왼쪽=요일 라벨, 위=월 라벨, 아래=시험기간 주석
+  const padL = 28, padT = 20, padR = 10, padB = 52;
+  const gridW = W - padL - padR;
+  const gridH = H - padT - padB;
+
+  const cellSize = Math.max(8, Math.min(
+    Math.floor(gridW / numWeeks) - 1,
+    Math.floor(gridH / 7) - 1
+  ));
+  const gap = 2;
+  const step = cellSize + gap;
+
+  const svgH = padT + 7 * step + padB;
+
+  const svg = d3.select(container).append('svg')
+    .attr('width', '100%')
+    .attr('height', svgH)
+    .attr('viewBox', `0 0 ${W} ${svgH}`);
+
+  const g = svg.append('g').attr('transform', `translate(${padL},${padT})`);
+
+  const colorScale = d3.scaleThreshold()
+    .domain([1, 4, 7, 10])
+    .range(['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39']);
+
+  // 요일 라벨 (왼쪽) — 월·수·금만
+  const dayKor = ['일','월','화','수','목','금','토'];
+  [1, 3, 5].forEach(d => {
+    svg.append('text')
+      .attr('x', padL - 4)
+      .attr('y', padT + d * step + cellSize * 0.75)
+      .attr('text-anchor', 'end')
+      .attr('font-size', '9px')
+      .attr('fill', '#999')
+      .text(dayKor[d]);
+  });
+
+  // 월 라벨 (위)
+  const months = d3.timeMonths(startDate, endDate);
+  months.forEach(m => {
+    const wk = Math.floor(d3.timeDay.count(startDate, m) / 7);
+    g.append('text')
+      .attr('x', wk * step)
+      .attr('y', -6)
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('fill', '#666')
+      .text(d3.timeFormat('%m월')(m));
+  });
+
+  // 셀 그리기
+  const dateMap = new Map(entries.map(e => [e.ds, e.count]));
+  const allDays = d3.timeDays(startDate, endDate);
+
+  const cells = g.selectAll('.heatmap-rect')
+    .data(allDays)
+    .enter()
+    .append('rect')
+    .attr('class', 'heatmap-rect')
+    .attr('width', cellSize)
+    .attr('height', cellSize)
+    .attr('rx', 2)
+    .attr('x', d => Math.floor(d3.timeDay.count(startDate, d) / 7) * step)
+    .attr('y', d => d.getDay() * step)
+    .attr('fill', d => {
+      const ds = fmtDate(d);
+      if (ds.startsWith('2025') || ds >= '2026-06-24') return '#fff';
+      return colorScale(dateMap.get(ds) || 0);
+    })
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 0);
+
+  // 툴팁
+  cells.on('mouseover', function(e, d) {
+    const ds = fmtDate(d);
+    if (ds.startsWith('2025') || ds >= '2026-06-24') return;
+    const cnt = dateMap.get(ds) || 0;
+    d3.select('body').selectAll('.scatter-tooltip').remove();
+    d3.select('body').append('div').attr('class', 'scatter-tooltip')
+      .style('opacity', 1)
+      .style('left', (e.pageX + 14) + 'px')
+      .style('top',  (e.pageY - 14) + 'px')
+      .html(`<b>${ds}</b><br>${cnt}판`);
+  }).on('mouseout', () => d3.select('body').selectAll('.scatter-tooltip').remove());
+
+  // 애니메이션: 왼쪽부터 열 단위로
+  cells.attr('opacity', 0)
+    .transition().duration(250)
+    .delay(d => Math.floor(d3.timeDay.count(startDate, d) / 7) * 12)
+    .attr('opacity', 1);
+
+  // ── 시험기간 브래킷 (히트맵 아래 수평) ──
+  const examPeriods = DATA.season1.overall.exam_periods || [];
+  const parseEx = d3.timeParse('%Y-%m-%d');
+  const gridBottom = 7 * step;
+  const bY = gridBottom + 8;
+  const bH = 5;
+
+  examPeriods.forEach(ep => {
+    const c0 = Math.floor(d3.timeDay.count(startDate, parseEx(ep.start)) / 7);
+    const c1 = Math.floor(d3.timeDay.count(startDate, parseEx(ep.end))   / 7);
+    const x0 = c0 * step;
+    const x1 = (c1 + 1) * step - gap;
+    const mx = (x0 + x1) / 2;
+
+    // 수평 브래킷
+    [[x0, bY, x1, bY], [x0, bY, x0, bY + bH], [x1, bY, x1, bY + bH]]
+      .forEach(([x1_, y1_, x2_, y2_]) =>
+        g.append('line')
+          .attr('x1', x1_).attr('y1', y1_)
+          .attr('x2', x2_).attr('y2', y2_)
+          .attr('stroke', '#555').attr('stroke-width', 1.5)
+      );
+
+    g.append('text')
+      .attr('x', mx).attr('y', bY + bH + 12)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '11px').attr('font-weight', '700').attr('fill', '#333')
+      .text(ep.name);
+    g.append('text')
+      .attr('x', mx).attr('y', bY + bH + 24)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '10px').attr('fill', '#777')
+      .text(`${ep.games}판 · ${ep.daily_avg}판/일`);
+  });
+
+  // ── 우측(하단) 시험기간 카드 ──
+  const cardsEl = document.getElementById('exam-event-cards');
+  if (cardsEl && examPeriods.length > 0) {
+    cardsEl.innerHTML = examPeriods.map(ep => {
+      const diff    = ep.daily_avg - ep.non_exam_daily_avg;
+      const diffStr = diff >= 0
+        ? `<span class="exam-card-highlight">+${diff.toFixed(1)}판/일</span> 증가`
+        : `<span class="exam-card-highlight">${diff.toFixed(1)}판/일</span> 감소`;
+      return `
+        <div class="exam-card">
+          <div class="exam-card-name">${ep.name}</div>
+          <div class="exam-card-period">${ep.start} ~ ${ep.end}</div>
+          <div class="exam-card-stats">
+            총 <span class="exam-card-highlight">${ep.games}판</span>
+            &middot; 일평균 <span class="exam-card-highlight">${ep.daily_avg}판</span><br>
+            평상시 ${ep.non_exam_daily_avg}판/일 대비 ${diffStr}
+          </div>
+        </div>`;
+    }).join('');
+  }
+}
+</script>
+
+</body>
+</html>
